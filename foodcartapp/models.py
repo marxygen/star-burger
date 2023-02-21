@@ -140,7 +140,7 @@ class Order(models.Model):
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     phone_number = PhoneNumberField(verbose_name="Номер телефона")
     delivery_address = models.TextField(verbose_name="Адрес доставки")
-    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа', default="SUBMITTED")
+    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа', default="SUBMITTED", db_index=True)
 
     def __str__(self):
         return f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address}"
