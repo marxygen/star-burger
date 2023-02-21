@@ -9,7 +9,7 @@ class OrderedItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.available()
     )
-    quantity = serializers.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)])
+    quantity = serializers.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)], required=True)
 
     class Meta:
         model = OrderedItem
@@ -17,7 +17,7 @@ class OrderedItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderedItemSerializer(many=True, required=True, source="ordered_items")
+    products = OrderedItemSerializer(many=True, required=True, source="ordered_items", allow_empty=False)
     firstname = serializers.CharField(source="first_name", required=True)
     lastname = serializers.CharField(source="last_name", required=True)
     phonenumber = PhoneNumberField(source="phone_number", required=True)
@@ -25,7 +25,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ("products", "firstname", "lastname", "phonenumber", "address")
+        fields = ("products", "firstname", "lastname", "phonenumber", "address", "id")
+        read_only_fields = ("id", *fields)
 
     @atomic
     def create(self, validated_data):
