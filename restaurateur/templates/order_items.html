@@ -1,5 +1,5 @@
 {% extends 'base_restaurateur_page.html' %}
-
+{% load checks %}
 {% block title %}Необработанные заказы | Star Burger{% endblock %}
 
 {% block content %}
@@ -10,8 +10,8 @@
   <hr/>
   <br/>
   <br/>
-  <div class="container">
-   <table class="table table-responsive">
+  <div class="container" style="padding: 3px; margin: 10px;">
+   <table class="table table-responsive" style="width: 98vw; max-width: 98vw">
     <tr>
       <th>ID заказа</th>
       <th>Статус</th>
@@ -24,6 +24,7 @@
       <th>Дата создания</th>
       <th>Дата звонка</th>
       <th>Дата доставки</th>
+      <th>Ресторан</th>
       <th></th>
     </tr>
 
@@ -40,6 +41,24 @@
         <td>{{ order.creation_date }}</td>
         <td>{{ order.call_date }}</td>
         <td>{{ order.delivery_date }}</td>
+      <td>
+        {% if order.executing_restaurant|isstring %}
+          Готовится {{ order.executing_restaurant }}
+
+        {% elif order.executing_restaurant|is_nonempty_list %}
+            Может быть приготовлен в
+            <ul>
+              {% for candidate in order.executing_restaurant %}
+                <li>{{ candidate }}</li>
+              {% endfor %}
+            </ul>
+
+        {% else %}
+            <b>Не может быть приготовлен<br>
+              одним рестораном</b>
+
+        {% endif %}
+        </td>
         <td><a href="{% url "admin:foodcartapp_order_change" object_id=order.id %}?return-to={{ request.path }}">Редактировать</a></td>
       </tr>
     {% endfor %}

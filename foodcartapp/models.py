@@ -1,3 +1,6 @@
+from collections import defaultdict
+from typing import List
+
 from django.utils import timezone
 from enum import Enum
 
@@ -149,12 +152,29 @@ class Order(models.Model):
     creation_date = models.DateTimeField(default=timezone.now, verbose_name='Дата создания', db_index=True)
     call_date = models.DateTimeField(verbose_name='Дата звонка', null=True, blank=True)
     delivery_date = models.DateTimeField(verbose_name='Дата доставки', null=True, blank=True)
-    payment_type = models.CharField(verbose_name="Тип оплаты", choices=(("CASH", "Наличными при доставке"), ("ONLINE", "On-line, при создании")), default="CASH", max_length=6, db_index=True)
+    payment_type = models.CharField(verbose_name="Тип оплаты",
+                                    choices=(("CASH", "Наличными при доставке"), ("ONLINE", "On-line, при создании")),
+                                    default="CASH", max_length=6, db_index=True)
+    executing_restaurant = models.ForeignKey(to=Restaurant, verbose_name='Ресторан, готовящий заказ', null=True,
+                                             blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return (f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
                 f"от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address} "
                 f"(создан {self.creation_date.strftime(DATETIME_FORMAT)})")
+
+    def get_matching_restaurants(self) -> List[Restaurant]:
+        """Return a list of restaurants that can fullfull this order"""
+        products = [o.product for o in self.ordered_items.select_related().all()]
+        menu_items = RestaurantMenuItem.objects.select_related().filter(availability=True)
+
+        matching_restaurants = defaultdict(int)
+        for menu_item in menu_items:
+            if menu_item.product in products:
+                matching_restaurants[menu_item.restaurant] += 1
+
+        return [restaurant for restaurant, available_products in matching_restaurants.items() if
+                available_products == len(products)]
 
     class Meta:
         verbose_name = "Заказ"
@@ -200,3 +220,11 @@ def update_ordered_item_price(sender, instance: OrderedItem, **kwargs):
         previous_product_price = OrderedItem.objects.get(id=instance.id).product_price
         if previous_product_price != instance.product_price:
             instance.product_price = previous_product_price
+
+
+@receiver(signal=pre_save, sender=Order)
+def update_order_status(sender, instance: Order, **kwargs):
+    """If `executing_restaurant` has been set to a value, set the order to be in progress"""
+    previous_executor = Order.objects.get(id=instance.id).executing_restaurant
+    if previous_executor != instance.executing_restaurant and instance.executing_restaurant is not None:
+        instance.status = OrderStatus.IN_PROGRESS.name
