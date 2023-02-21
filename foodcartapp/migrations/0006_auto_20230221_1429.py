@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0005_order_creation_date'),
+        ("foodcartapp", "0005_order_creation_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='call_date',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Дата звонка'),
+            model_name="order",
+            name="call_date",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Дата звонка"
+            ),
         ),
         migrations.AddField(
-            model_name='order',
-            name='delivery_date',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Дата доставки'),
+            model_name="order",
+            name="delivery_date",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Дата доставки"
+            ),
         ),
     ]

@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0001_order_status'),
+        ("foodcartapp", "0001_order_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[('SUBMITTED', 'В обработке'), ('IN_PROGRESS', 'Готовится'), ('IN_DELIVERY', 'Доставляется'), ('DELIVERED', 'Доставлен')], default='SUBMITTED', max_length=11, verbose_name='Статус заказа'),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("SUBMITTED", "В обработке"),
+                    ("IN_PROGRESS", "Готовится"),
+                    ("IN_DELIVERY", "Доставляется"),
+                    ("DELIVERED", "Доставлен"),
+                ],
+                default="SUBMITTED",
+                max_length=11,
+                verbose_name="Статус заказа",
+            ),
         ),
     ]

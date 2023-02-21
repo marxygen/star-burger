@@ -7,13 +7,23 @@ import foodcartapp.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', 'update_previous_orders'),
+        ("foodcartapp", "update_previous_orders"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[(foodcartapp.models.OrderStatus['SUBMITTED'], 'Отправлен'), (foodcartapp.models.OrderStatus['IN_PROGRESS'], 'Готовится'), (foodcartapp.models.OrderStatus['IN_DELIVERY'], 'Доставляется'), (foodcartapp.models.OrderStatus['DELIVERED'], 'Доставлен')], default='SUBMITTED', max_length=10, verbose_name='Статус заказа'),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    (foodcartapp.models.OrderStatus["SUBMITTED"], "Отправлен"),
+                    (foodcartapp.models.OrderStatus["IN_PROGRESS"], "Готовится"),
+                    (foodcartapp.models.OrderStatus["IN_DELIVERY"], "Доставляется"),
+                    (foodcartapp.models.OrderStatus["DELIVERED"], "Доставлен"),
+                ],
+                default="SUBMITTED",
+                max_length=10,
+                verbose_name="Статус заказа",
+            ),
         ),
     ]

@@ -6,28 +6,52 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0009_order_executing_restaurant'),
+        ("foodcartapp", "0009_order_executing_restaurant"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='delivery_latitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=8, null=True, verbose_name='Широта адреса доставки'),
+            model_name="order",
+            name="delivery_latitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=5,
+                max_digits=8,
+                null=True,
+                verbose_name="Широта адреса доставки",
+            ),
         ),
         migrations.AddField(
-            model_name='order',
-            name='delivery_longitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=8, null=True, verbose_name='Долгота адреса доставки'),
+            model_name="order",
+            name="delivery_longitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=5,
+                max_digits=8,
+                null=True,
+                verbose_name="Долгота адреса доставки",
+            ),
         ),
         migrations.AddField(
-            model_name='restaurant',
-            name='latitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=8, null=True, verbose_name='Широта'),
+            model_name="restaurant",
+            name="latitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=5,
+                max_digits=8,
+                null=True,
+                verbose_name="Широта",
+            ),
         ),
         migrations.AddField(
-            model_name='restaurant',
-            name='longitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=8, null=True, verbose_name='Долгота'),
+            model_name="restaurant",
+            name="longitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=5,
+                max_digits=8,
+                null=True,
+                verbose_name="Долгота",
+            ),
         ),
     ]

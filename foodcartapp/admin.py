@@ -123,4 +123,4 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderedItemInline]
 
     def response_change(self, request, obj):
-        return redirect(request.GET.get('return-to', '/admin/'))
+        return redirect(request.GET.get("return-to", "/admin/"))

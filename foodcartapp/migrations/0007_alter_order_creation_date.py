@@ -7,13 +7,17 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0006_auto_20230221_1429'),
+        ("foodcartapp", "0006_auto_20230221_1429"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='creation_date',
-            field=models.DateTimeField(db_index=True, default=django.utils.timezone.now, verbose_name='Дата создания'),
+            model_name="order",
+            name="creation_date",
+            field=models.DateTimeField(
+                db_index=True,
+                default=django.utils.timezone.now,
+                verbose_name="Дата создания",
+            ),
         ),
     ]

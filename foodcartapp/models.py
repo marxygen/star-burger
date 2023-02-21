@@ -14,7 +14,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 from geocoder import resolve_location_for_address
 
-DATETIME_FORMAT = '%H:%M:%S %d.%m.%Y'
+DATETIME_FORMAT = "%H:%M:%S %d.%m.%Y"
 
 
 class OrderStatus(Enum):
@@ -40,10 +40,12 @@ class Restaurant(models.Model):
         max_length=50,
         blank=True,
     )
-    latitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
-                                            verbose_name='Широта')
-    longitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
-                                             verbose_name='Долгота')
+    latitude = models.DecimalField(
+        decimal_places=5, max_digits=8, null=True, blank=True, verbose_name="Широта"
+    )
+    longitude = models.DecimalField(
+        decimal_places=5, max_digits=8, null=True, blank=True, verbose_name="Долгота"
+    )
 
     class Meta:
         verbose_name = "ресторан"
@@ -55,7 +57,9 @@ class Restaurant(models.Model):
     def get_distance_to(self, address_lat: float, address_long: float) -> float | None:
         if not all([address_lat, address_long, self.latitude, self.longitude]):
             return None
-        kms = distance.distance((address_lat, address_long), (self.latitude, self.longitude)).km
+        kms = distance.distance(
+            (address_lat, address_long), (self.latitude, self.longitude)
+        ).km
         if kms:
             return round(kms, 3)
         return None
@@ -161,43 +165,89 @@ class Order(models.Model):
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     phone_number = PhoneNumberField(verbose_name="Номер телефона")
     delivery_address = models.TextField(verbose_name="Адрес доставки")
-    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа',
-                              default="SUBMITTED", db_index=True)
-    comment = models.TextField(blank=True, null=False, verbose_name='Комментарий')
-    creation_date = models.DateTimeField(default=timezone.now, verbose_name='Дата создания', db_index=True)
-    call_date = models.DateTimeField(verbose_name='Дата звонка', null=True, blank=True)
-    delivery_date = models.DateTimeField(verbose_name='Дата доставки', null=True, blank=True)
-    payment_type = models.CharField(verbose_name="Тип оплаты",
-                                    choices=(("CASH", "Наличными при доставке"), ("ONLINE", "On-line, при создании")),
-                                    default="CASH", max_length=6, db_index=True)
-    executing_restaurant = models.ForeignKey(to=Restaurant, verbose_name='Ресторан, готовящий заказ', null=True,
-                                             blank=True, on_delete=models.SET_NULL)
+    status = models.CharField(
+        choices=OrderStatus.to_list(),
+        max_length=11,
+        verbose_name="Статус заказа",
+        default="SUBMITTED",
+        db_index=True,
+    )
+    comment = models.TextField(blank=True, null=False, verbose_name="Комментарий")
+    creation_date = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата создания", db_index=True
+    )
+    call_date = models.DateTimeField(verbose_name="Дата звонка", null=True, blank=True)
+    delivery_date = models.DateTimeField(
+        verbose_name="Дата доставки", null=True, blank=True
+    )
+    payment_type = models.CharField(
+        verbose_name="Тип оплаты",
+        choices=(
+            ("CASH", "Наличными при доставке"),
+            ("ONLINE", "On-line, при создании"),
+        ),
+        default="CASH",
+        max_length=6,
+        db_index=True,
+    )
+    executing_restaurant = models.ForeignKey(
+        to=Restaurant,
+        verbose_name="Ресторан, готовящий заказ",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
 
-    delivery_latitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
-                                            verbose_name='Широта адреса доставки')
-    delivery_longitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
-                                             verbose_name='Долгота адреса доставки')
+    delivery_latitude = models.DecimalField(
+        decimal_places=5,
+        max_digits=8,
+        null=True,
+        blank=True,
+        verbose_name="Широта адреса доставки",
+    )
+    delivery_longitude = models.DecimalField(
+        decimal_places=5,
+        max_digits=8,
+        null=True,
+        blank=True,
+        verbose_name="Долгота адреса доставки",
+    )
 
     def __str__(self):
-        return (f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
-                f"от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address} "
-                f"(создан {self.creation_date.strftime(DATETIME_FORMAT)})")
+        return (
+            f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
+            f"от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address} "
+            f"(создан {self.creation_date.strftime(DATETIME_FORMAT)})"
+        )
 
-    def get_matching_restaurants(self, order_by_remoteness: bool = True) -> List[Restaurant]:
+    def get_matching_restaurants(
+        self, order_by_remoteness: bool = True
+    ) -> List[Restaurant]:
         """Return a list of restaurants that can fullfull this order"""
         products = [o.product for o in self.ordered_items.select_related().all()]
-        menu_items = RestaurantMenuItem.objects.select_related().filter(availability=True)
+        menu_items = RestaurantMenuItem.objects.select_related().filter(
+            availability=True
+        )
 
         matching_restaurants = defaultdict(int)
         for menu_item in menu_items:
             if menu_item.product in products:
                 matching_restaurants[menu_item.restaurant] += 1
 
-        matching_restaurants = [restaurant for restaurant, available_products in matching_restaurants.items() if
-                available_products == len(products)]
+        matching_restaurants = [
+            restaurant
+            for restaurant, available_products in matching_restaurants.items()
+            if available_products == len(products)
+        ]
 
         if order_by_remoteness:
-            matching_restaurants = sorted(matching_restaurants, key=lambda restaurant: restaurant.get_distance_to(self.delivery_latitude, self.delivery_longitude) or math.inf)
+            matching_restaurants = sorted(
+                matching_restaurants,
+                key=lambda restaurant: restaurant.get_distance_to(
+                    self.delivery_latitude, self.delivery_longitude
+                )
+                or math.inf,
+            )
         return matching_restaurants
 
     class Meta:
@@ -261,11 +311,20 @@ def update_order(sender, instance: Order, **kwargs):
     previous_order_instance = Order.objects.get(id=instance.id)
 
     # If `executing_restaurant` has been set to a value, set the order to be in progress
-    if previous_order_instance.executing_restaurant != instance.executing_restaurant and instance.executing_restaurant is not None:
+    if (
+        previous_order_instance.executing_restaurant != instance.executing_restaurant
+        and instance.executing_restaurant is not None
+    ):
         instance.status = OrderStatus.IN_PROGRESS.name
 
     # Calculate distance if any of the addresses have been changed
-    if previous_order_instance.delivery_address != instance.delivery_address and instance.delivery_address:
+    if (
+        previous_order_instance.delivery_address != instance.delivery_address
+        and instance.delivery_address
+    ):
         latitude, longitude = resolve_location_for_address(instance.delivery_address)
         if latitude and longitude:
-            instance.delivery_latitude, instance.delivery_longitude = latitude, longitude
+            instance.delivery_latitude, instance.delivery_longitude = (
+                latitude,
+                longitude,
+            )

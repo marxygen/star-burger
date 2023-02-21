@@ -49,10 +49,17 @@ class OrderSerializer(serializers.ModelSerializer):
             "creation_date",
             "call_date",
             "delivery_date",
-            "payment_type"
+            "payment_type",
         )
         read_only_fields = (
-            "id", "total_amount", 'status', "creation_date", "call_date", "delivery_date", "payment_type")
+            "id",
+            "total_amount",
+            "status",
+            "creation_date",
+            "call_date",
+            "delivery_date",
+            "payment_type",
+        )
 
     @atomic
     def create(self, validated_data):
@@ -77,7 +84,10 @@ class ManagerialOrderSerializer(OrderSerializer):
         if order.executing_restaurant:
             return str(order.executing_restaurant)
 
-        return [f'{restaurant} - {restaurant.get_distance_to(order.delivery_latitude, order.delivery_longitude) or "-"} км.' for restaurant in order.get_matching_restaurants()]
+        return [
+            f'{restaurant} - {restaurant.get_distance_to(order.delivery_latitude, order.delivery_longitude) or "-"} км.'
+            for restaurant in order.get_matching_restaurants()
+        ]
 
     class Meta:
         fields = read_only_fields = (
@@ -94,6 +104,6 @@ class ManagerialOrderSerializer(OrderSerializer):
             "call_date",
             "delivery_date",
             "payment_type",
-            "executing_restaurant"
+            "executing_restaurant",
         )
         model = Order
