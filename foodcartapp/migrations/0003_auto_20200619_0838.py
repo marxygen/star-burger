@@ -9,12 +9,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('foodcartapp', '0002_auto_20200619_0836'),
+        ("foodcartapp", "0002_auto_20200619_0836"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='CustomUser',
-            new_name='Customer',
+            old_name="CustomUser",
+            new_name="Customer",
         ),
     ]

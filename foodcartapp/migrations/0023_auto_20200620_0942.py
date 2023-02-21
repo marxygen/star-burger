@@ -6,29 +6,29 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0022_auto_20200619_1003'),
+        ("foodcartapp", "0022_auto_20200619_1003"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='order',
-            name='customer',
+            model_name="order",
+            name="customer",
         ),
         migrations.RemoveField(
-            model_name='orderitem',
-            name='order',
+            model_name="orderitem",
+            name="order",
         ),
         migrations.RemoveField(
-            model_name='orderitem',
-            name='product',
+            model_name="orderitem",
+            name="product",
         ),
         migrations.DeleteModel(
-            name='Customer',
+            name="Customer",
         ),
         migrations.DeleteModel(
-            name='Order',
+            name="Order",
         ),
         migrations.DeleteModel(
-            name='OrderItem',
+            name="OrderItem",
         ),
     ]

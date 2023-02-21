@@ -7,13 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0014_auto_20200619_0934'),
+        ("foodcartapp", "0014_auto_20200619_0934"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='restaurant',
-            name='admin',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='administrated_restaurants', to='foodcartapp.Customer', verbose_name='администратор'),
+            model_name="restaurant",
+            name="admin",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="administrated_restaurants",
+                to="foodcartapp.Customer",
+                verbose_name="администратор",
+            ),
         ),
     ]

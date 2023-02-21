@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0026_restaurantmenuitem'),
+        ("foodcartapp", "0026_restaurantmenuitem"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='restaurantmenuitem',
-            unique_together={('restaurant', 'product')},
+            name="restaurantmenuitem",
+            unique_together={("restaurant", "product")},
         ),
     ]

@@ -13,7 +13,7 @@ def fill_new_admin_field(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0016_restaurant_new_admin'),
+        ("foodcartapp", "0016_restaurant_new_admin"),
     ]
 
     operations = [

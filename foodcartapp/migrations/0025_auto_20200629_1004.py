@@ -6,15 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0024_product_ingridients'),
+        ("foodcartapp", "0024_product_ingridients"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='restaurant',
-            name='city',
+            model_name="restaurant",
+            name="city",
         ),
         migrations.DeleteModel(
-            name='City',
+            name="City",
         ),
     ]

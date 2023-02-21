@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0023_auto_20200620_0942'),
+        ("foodcartapp", "0023_auto_20200620_0942"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='ingridients',
-            field=models.CharField(blank=True, max_length=200, verbose_name='ингредиенты'),
+            model_name="product",
+            name="ingridients",
+            field=models.CharField(
+                blank=True, max_length=200, verbose_name="ингредиенты"
+            ),
         ),
     ]

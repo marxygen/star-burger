@@ -7,12 +7,12 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('foodcartapp', '0012_auto_20200619_0924'),
+        ("foodcartapp", "0012_auto_20200619_0924"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Hotel',
-            new_name='Restaurant',
+            old_name="Hotel",
+            new_name="Restaurant",
         ),
     ]

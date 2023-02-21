@@ -7,27 +7,32 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0013_auto_20200619_0932'),
+        ("foodcartapp", "0013_auto_20200619_0932"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='restaurant',
-            options={'verbose_name': 'ресторан', 'verbose_name_plural': 'рестораны'},
+            name="restaurant",
+            options={"verbose_name": "ресторан", "verbose_name_plural": "рестораны"},
         ),
         migrations.RenameField(
-            model_name='product',
-            old_name='hotel',
-            new_name='restaurant',
+            model_name="product",
+            old_name="hotel",
+            new_name="restaurant",
         ),
         migrations.RenameField(
-            model_name='restaurant',
-            old_name='hoteladmin',
-            new_name='admin',
+            model_name="restaurant",
+            old_name="hoteladmin",
+            new_name="admin",
         ),
         migrations.AlterField(
-            model_name='restaurant',
-            name='city',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='restaurants', to='foodcartapp.City', verbose_name='город'),
+            model_name="restaurant",
+            name="city",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="restaurants",
+                to="foodcartapp.City",
+                verbose_name="город",
+            ),
         ),
     ]

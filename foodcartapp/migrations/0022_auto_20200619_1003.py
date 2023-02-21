@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0021_auto_20200619_1002'),
+        ("foodcartapp", "0021_auto_20200619_1002"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='payment_type',
-            field=models.SmallIntegerField(choices=[(1, 'наличными после доставки')], db_index=True, default=1, verbose_name='тип заказа'),
+            model_name="order",
+            name="payment_type",
+            field=models.SmallIntegerField(
+                choices=[(1, "наличными после доставки")],
+                db_index=True,
+                default=1,
+                verbose_name="тип заказа",
+            ),
         ),
     ]

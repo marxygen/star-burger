@@ -13,7 +13,7 @@ def fill_city_field(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0008_hotel_city'),
+        ("foodcartapp", "0008_hotel_city"),
     ]
 
     operations = [
