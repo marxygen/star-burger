@@ -1,3 +1,4 @@
+from django.utils import timezone
 from enum import Enum
 
 from django.db import models
@@ -6,6 +7,8 @@ from django.db.models import Sum, F
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
+
+DATETIME_FORMAT = '%H:%M:%S %d.%m.%Y'
 
 
 class OrderStatus(Enum):
@@ -140,11 +143,17 @@ class Order(models.Model):
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     phone_number = PhoneNumberField(verbose_name="Номер телефона")
     delivery_address = models.TextField(verbose_name="Адрес доставки")
-    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа', default="SUBMITTED", db_index=True)
+    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа',
+                              default="SUBMITTED", db_index=True)
     comment = models.TextField(blank=True, null=False, verbose_name='Комментарий')
+    creation_date = models.DateTimeField(default=timezone.now, verbose_name='Дата создания', db_index=True)
+    call_date = models.DateTimeField(verbose_name='Дата звонка', null=True, blank=True)
+    delivery_date = models.DateTimeField(verbose_name='Дата доставки', null=True, blank=True)
 
     def __str__(self):
-        return f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address}"
+        return (f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
+                f"от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address} "
+                f"(создан {self.creation_date.strftime(DATETIME_FORMAT)})")
 
     class Meta:
         verbose_name = "Заказ"

@@ -43,9 +43,12 @@ class OrderSerializer(serializers.ModelSerializer):
             "id",
             "total_amount",
             "status",
-            "comment"
+            "comment",
+            "creation_date",
+            "call_date",
+            "delivery_date"
         )
-        read_only_fields = ("id", "total_amount", 'status')
+        read_only_fields = ("id", "total_amount", 'status', "creation_date", "call_date", "delivery_date")
 
     @atomic
     def create(self, validated_data):
@@ -53,7 +56,6 @@ class OrderSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         for entity in ordered_items_data:
             OrderedItem.objects.create(**entity, order=order)
-            raise Exception()
         return order
 
     def get_status(self, instance: Order) -> str:

@@ -20,6 +20,9 @@
       <th>Телефон</th>
       <th>Адрес доставки</th>
       <th>Комментарий</th>
+      <th>Дата создания</th>
+      <th>Дата звонка</th>
+      <th>Дата доставки</th>
       <th></th>
     </tr>
 
@@ -32,6 +35,9 @@
         <td>{{ order.phonenumber }}</td>
         <td>{{ order.address }}</td>
         <td>{{ order.comment }}</td>
+        <td>{{ order.creation_date }}</td>
+        <td>{{ order.call_date }}</td>
+        <td>{{ order.delivery_date }}</td>
         <td><a href="{% url "admin:foodcartapp_order_change" object_id=order.id %}?return-to={{ request.path }}">Редактировать</a></td>
       </tr>
     {% endfor %}
