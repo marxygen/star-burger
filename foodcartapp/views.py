@@ -1,8 +1,11 @@
+import json
 from django.http import JsonResponse
 from django.templatetags.static import static
+from rest_framework.views import View
 
 
 from .models import Product
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -58,5 +61,10 @@ def product_list_api(request):
 
 
 def register_order(request):
-    # TODO это лишь заглушка
-    return JsonResponse({})
+    # print(json.loads(request.body.decode()))
+    order = OrderSerializer(data=json.loads(request.body.decode()))
+    if payload_valid := order.is_valid():
+        order.save()
+    print(order.validated_data)
+    order.is_valid(raise_exception=True)
+    return JsonResponse(order.data, status=200 if payload_valid else 400)
