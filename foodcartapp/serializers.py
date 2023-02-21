@@ -46,9 +46,10 @@ class OrderSerializer(serializers.ModelSerializer):
             "comment",
             "creation_date",
             "call_date",
-            "delivery_date"
+            "delivery_date",
+            "payment_type"
         )
-        read_only_fields = ("id", "total_amount", 'status', "creation_date", "call_date", "delivery_date")
+        read_only_fields = ("id", "total_amount", 'status', "creation_date", "call_date", "delivery_date", "payment_type")
 
     @atomic
     def create(self, validated_data):

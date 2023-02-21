@@ -149,6 +149,7 @@ class Order(models.Model):
     creation_date = models.DateTimeField(default=timezone.now, verbose_name='Дата создания', db_index=True)
     call_date = models.DateTimeField(verbose_name='Дата звонка', null=True, blank=True)
     delivery_date = models.DateTimeField(verbose_name='Дата доставки', null=True, blank=True)
+    payment_type = models.CharField(verbose_name="Тип оплаты", choices=(("CASH", "Наличными при доставке"), ("ONLINE", "On-line, при создании")), default="CASH", max_length=6, db_index=True)
 
     def __str__(self):
         return (f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
