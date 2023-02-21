@@ -23,10 +23,12 @@ class OrderSerializer(serializers.ModelSerializer):
     phonenumber = PhoneNumberField(source="phone_number", required=True)
     address = serializers.CharField(source="delivery_address", required=True)
 
+    total_amount = serializers.FloatField()
+
     class Meta:
         model = Order
-        fields = ("products", "firstname", "lastname", "phonenumber", "address", "id")
-        read_only_fields = ("id", *fields)
+        fields = ("products", "firstname", "lastname", "phonenumber", "address", "id", "total_amount")
+        read_only_fields = ("id", "total_amount", *fields)
 
     @atomic
     def create(self, validated_data):
