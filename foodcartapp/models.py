@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Sum, F
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -109,10 +111,12 @@ class OrderQuerySet(models.QuerySet):
     """
 
     def total_amount(self):
-        return self.annotate(total_amount=Sum(
-                    F('ordered_items__quantity') *
-                    F('ordered_items__product__price'),
-                    output_field=models.FloatField()))
+        return self.annotate(
+            total_amount=Sum(
+                F("ordered_items__quantity") * F("ordered_items__product_price"),
+                output_field=models.FloatField(),
+            )
+        )
 
 
 class Order(models.Model):
@@ -135,9 +139,19 @@ class OrderedItem(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.DO_NOTHING, verbose_name="Товар"
     )
-    quantity = models.IntegerField(verbose_name="Количество",
-                                   validators=[MinValueValidator(1), MaxValueValidator(1000)])
-    order = models.ForeignKey(to=Order, related_name='ordered_items', on_delete=models.CASCADE)
+    quantity = models.IntegerField(
+        verbose_name="Количество",
+        validators=[MinValueValidator(1), MaxValueValidator(1000)],
+    )
+    product_price = models.DecimalField(
+        verbose_name="Цена товара",
+        decimal_places=2,
+        max_digits=6,
+        validators=[MinValueValidator(1), MaxValueValidator(1000)],
+    )
+    order = models.ForeignKey(
+        to=Order, related_name="ordered_items", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f"{self.product}, {self.quantity} шт."
@@ -145,3 +159,16 @@ class OrderedItem(models.Model):
     class Meta:
         verbose_name = "Заказанный товар"
         verbose_name_plural = "Заказанные товары"
+
+
+@receiver(signal=pre_save, sender=OrderedItem)
+def update_ordered_item_price(sender, instance: OrderedItem, **kwargs):
+    """Update price of an ordered item at the moment of creation"""
+    if instance.id is None:
+        # An instance is being created
+        instance.product_price = instance.product.price * instance.quantity
+    else:
+        # Do not allow to change `product_price` field
+        previous_product_price = OrderedItem.objects.get(id=instance.id).product_price
+        if previous_product_price != instance.product_price:
+            instance.product_price = previous_product_price

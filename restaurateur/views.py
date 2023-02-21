@@ -111,7 +111,5 @@ def view_orders(request):
     return render(
         request,
         template_name="order_items.html",
-        context={
-            "orders": OrderSerializer(orders, many=True).data
-        },
+        context={"orders": OrderSerializer(orders, many=True).data},
     )

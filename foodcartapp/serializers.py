@@ -9,25 +9,37 @@ class OrderedItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.available()
     )
-    quantity = serializers.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)], required=True)
+    quantity = serializers.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(1000)], required=True
+    )
 
     class Meta:
         model = OrderedItem
-        fields = ('product', 'quantity')
+        fields = ("product", "quantity")
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderedItemSerializer(many=True, required=True, source="ordered_items", allow_empty=False)
+    products = OrderedItemSerializer(
+        many=True, required=True, source="ordered_items", allow_empty=False
+    )
     firstname = serializers.CharField(source="first_name", required=True)
     lastname = serializers.CharField(source="last_name", required=True)
     phonenumber = PhoneNumberField(source="phone_number", required=True)
     address = serializers.CharField(source="delivery_address", required=True)
 
-    total_amount = serializers.FloatField()
+    total_amount = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ("products", "firstname", "lastname", "phonenumber", "address", "id", "total_amount")
+        fields = (
+            "products",
+            "firstname",
+            "lastname",
+            "phonenumber",
+            "address",
+            "id",
+            "total_amount",
+        )
         read_only_fields = ("id", "total_amount", *fields)
 
     @atomic
@@ -36,4 +48,5 @@ class OrderSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         for entity in ordered_items_data:
             OrderedItem.objects.create(**entity, order=order)
+            raise Exception()
         return order

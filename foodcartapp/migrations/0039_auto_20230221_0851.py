@@ -8,23 +8,33 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0038_order_ordereditem'),
+        ("foodcartapp", "0038_order_ordereditem"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='order',
-            name='ordered_items',
+            model_name="order",
+            name="ordered_items",
         ),
         migrations.AddField(
-            model_name='ordereditem',
-            name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ordered_items', to='foodcartapp.order'),
+            model_name="ordereditem",
+            name="order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="ordered_items",
+                to="foodcartapp.order",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='ordereditem',
-            name='quantity',
-            field=models.IntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(1000)], verbose_name='Количество'),
+            model_name="ordereditem",
+            name="quantity",
+            field=models.IntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(1000),
+                ],
+                verbose_name="Количество",
+            ),
         ),
     ]
