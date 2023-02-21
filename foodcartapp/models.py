@@ -1,6 +1,7 @@
+import math
 from collections import defaultdict
 from typing import List
-
+from geopy import distance
 from django.utils import timezone
 from enum import Enum
 
@@ -10,6 +11,8 @@ from django.db.models import Sum, F
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
+
+from geocoder import resolve_location_for_address
 
 DATETIME_FORMAT = '%H:%M:%S %d.%m.%Y'
 
@@ -37,6 +40,10 @@ class Restaurant(models.Model):
         max_length=50,
         blank=True,
     )
+    latitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
+                                            verbose_name='Широта')
+    longitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
+                                             verbose_name='Долгота')
 
     class Meta:
         verbose_name = "ресторан"
@@ -44,6 +51,14 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_distance_to(self, address_lat: float, address_long: float) -> float | None:
+        if not all([address_lat, address_long, self.latitude, self.longitude]):
+            return None
+        kms = distance.distance((address_lat, address_long), (self.latitude, self.longitude)).km
+        if kms:
+            return round(kms, 3)
+        return None
 
 
 class ProductQuerySet(models.QuerySet):
@@ -158,12 +173,17 @@ class Order(models.Model):
     executing_restaurant = models.ForeignKey(to=Restaurant, verbose_name='Ресторан, готовящий заказ', null=True,
                                              blank=True, on_delete=models.SET_NULL)
 
+    delivery_latitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
+                                            verbose_name='Широта адреса доставки')
+    delivery_longitude = models.DecimalField(decimal_places=5, max_digits=8, null=True, blank=True,
+                                             verbose_name='Долгота адреса доставки')
+
     def __str__(self):
         return (f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций "
                 f"от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address} "
                 f"(создан {self.creation_date.strftime(DATETIME_FORMAT)})")
 
-    def get_matching_restaurants(self) -> List[Restaurant]:
+    def get_matching_restaurants(self, order_by_remoteness: bool = True) -> List[Restaurant]:
         """Return a list of restaurants that can fullfull this order"""
         products = [o.product for o in self.ordered_items.select_related().all()]
         menu_items = RestaurantMenuItem.objects.select_related().filter(availability=True)
@@ -173,8 +193,12 @@ class Order(models.Model):
             if menu_item.product in products:
                 matching_restaurants[menu_item.restaurant] += 1
 
-        return [restaurant for restaurant, available_products in matching_restaurants.items() if
+        matching_restaurants = [restaurant for restaurant, available_products in matching_restaurants.items() if
                 available_products == len(products)]
+
+        if order_by_remoteness:
+            matching_restaurants = sorted(matching_restaurants, key=lambda restaurant: restaurant.get_distance_to(self.delivery_latitude, self.delivery_longitude) or math.inf)
+        return matching_restaurants
 
     class Meta:
         verbose_name = "Заказ"
@@ -222,9 +246,26 @@ def update_ordered_item_price(sender, instance: OrderedItem, **kwargs):
             instance.product_price = previous_product_price
 
 
+@receiver(signal=pre_save, sender=Restaurant)
+def update_restaurant_location(sender, instance: Restaurant, **kwargs):
+    previous_location = Restaurant.objects.get(id=instance.id)
+
+    if previous_location.address != instance.address and instance.address:
+        latitude, longitude = resolve_location_for_address(instance.address)
+        if latitude and longitude:
+            instance.latitude, instance.longitude = latitude, longitude
+
+
 @receiver(signal=pre_save, sender=Order)
-def update_order_status(sender, instance: Order, **kwargs):
-    """If `executing_restaurant` has been set to a value, set the order to be in progress"""
-    previous_executor = Order.objects.get(id=instance.id).executing_restaurant
-    if previous_executor != instance.executing_restaurant and instance.executing_restaurant is not None:
+def update_order(sender, instance: Order, **kwargs):
+    previous_order_instance = Order.objects.get(id=instance.id)
+
+    # If `executing_restaurant` has been set to a value, set the order to be in progress
+    if previous_order_instance.executing_restaurant != instance.executing_restaurant and instance.executing_restaurant is not None:
         instance.status = OrderStatus.IN_PROGRESS.name
+
+    # Calculate distance if any of the addresses have been changed
+    if previous_order_instance.delivery_address != instance.delivery_address and instance.delivery_address:
+        latitude, longitude = resolve_location_for_address(instance.delivery_address)
+        if latitude and longitude:
+            instance.delivery_latitude, instance.delivery_longitude = latitude, longitude

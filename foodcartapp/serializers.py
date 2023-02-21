@@ -70,14 +70,14 @@ class ManagerialOrderSerializer(OrderSerializer):
     executing_restaurant = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_executing_restaurant(order: Order) -> List[str]:
+    def get_executing_restaurant(order: Order) -> List[str] | str:
         """
         If `executing_restaurant` is set, return it. Otherwise, return list of restaurants capable of executing the order
         """
         if order.executing_restaurant:
             return str(order.executing_restaurant)
 
-        return list(map(str, order.get_matching_restaurants()))
+        return [f'{restaurant} - {restaurant.get_distance_to(order.delivery_latitude, order.delivery_longitude) or "-"} км.' for restaurant in order.get_matching_restaurants()]
 
     class Meta:
         fields = read_only_fields = (
