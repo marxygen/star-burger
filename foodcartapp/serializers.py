@@ -26,6 +26,8 @@ class OrderSerializer(serializers.ModelSerializer):
     lastname = serializers.CharField(source="last_name", required=True)
     phonenumber = PhoneNumberField(source="phone_number", required=True)
     address = serializers.CharField(source="delivery_address", required=True)
+    # Probably would be good to allow the user to add comments, not just the administrator
+    comment = serializers.CharField(required=False)
 
     total_amount = serializers.FloatField(read_only=True)
     status = serializers.SerializerMethodField(read_only=True)
@@ -40,7 +42,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "address",
             "id",
             "total_amount",
-            "status"
+            "status",
+            "comment"
         )
         read_only_fields = ("id", "total_amount", 'status')
 
