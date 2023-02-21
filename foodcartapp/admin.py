@@ -114,4 +114,10 @@ class ProductAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(Order)
+class OrderedItemInline(admin.StackedInline):
+    model = OrderedItem
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [OrderedItemInline]

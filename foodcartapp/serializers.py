@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.transaction import atomic
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
@@ -8,10 +9,11 @@ class OrderedItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.available()
     )
+    quantity = serializers.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)])
 
     class Meta:
         model = OrderedItem
-        fields = "__all__"
+        fields = ('product', 'quantity')
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -27,10 +29,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     @atomic
     def create(self, validated_data):
-        ordered_items = [
-            OrderedItem.objects.create(**entity)
-            for entity in validated_data.pop("ordered_items")
-        ]
+        ordered_items_data = validated_data.pop("ordered_items")
         order = Order.objects.create(**validated_data)
-        order.ordered_items.set(ordered_items)
+        for entity in ordered_items_data:
+            OrderedItem.objects.create(**entity, order=order)
         return order

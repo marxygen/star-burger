@@ -1,8 +1,8 @@
 import json
 from django.http import JsonResponse
 from django.templatetags.static import static
-from rest_framework.views import View
-
+from rest_framework.response import Response
+from rest_framework.views import View, APIView
 
 from .models import Product
 from .serializers import OrderSerializer
@@ -70,11 +70,11 @@ def product_list_api(request):
     )
 
 
-def register_order(request):
-    # print(json.loads(request.body.decode()))
-    order = OrderSerializer(data=json.loads(request.body.decode()))
-    if payload_valid := order.is_valid():
+class CreateOrderView(APIView):
+    serializer_class = OrderSerializer
+
+    def post(self, request):
+        order = OrderSerializer(data=request.data)
+        order.is_valid(raise_exception=True)
         order.save()
-    print(order.validated_data)
-    order.is_valid(raise_exception=True)
-    return JsonResponse(order.data, status=200 if payload_valid else 400)
+        return Response(order.data)

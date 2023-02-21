@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -102,24 +102,7 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
-class OrderedItem(models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.DO_NOTHING, verbose_name="Товар"
-    )
-    quantity = models.IntegerField(verbose_name="Количество")
-
-    def __str__(self):
-        return f"{self.product}, {self.quantity} шт."
-
-    class Meta:
-        verbose_name = "Заказанный товар"
-        verbose_name_plural = "Заказанные товары"
-
-
 class Order(models.Model):
-    ordered_items = models.ManyToManyField(
-        to=OrderedItem, verbose_name="Заказанные товары"
-    )
     first_name = models.CharField(max_length=150, verbose_name="Имя")
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     phone_number = PhoneNumberField(verbose_name="Номер телефона")
@@ -131,3 +114,19 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+
+
+class OrderedItem(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.DO_NOTHING, verbose_name="Товар"
+    )
+    quantity = models.IntegerField(verbose_name="Количество",
+                                   validators=[MinValueValidator(1), MaxValueValidator(1000)])
+    order = models.ForeignKey(to=Order, related_name='ordered_items', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.product}, {self.quantity} шт."
+
+    class Meta:
+        verbose_name = "Заказанный товар"
+        verbose_name_plural = "Заказанные товары"
