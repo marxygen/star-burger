@@ -1,9 +1,22 @@
+from enum import Enum
+
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Sum, F
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+class OrderStatus(Enum):
+    SUBMITTED = "В обработке"
+    IN_PROGRESS = "Готовится"
+    IN_DELIVERY = "Доставляется"
+    DELIVERED = "Доставлен"
+
+    @classmethod
+    def to_list(cls) -> list:
+        return [(field.name, field.value) for field in cls]
 
 
 class Restaurant(models.Model):
@@ -110,8 +123,11 @@ class OrderQuerySet(models.QuerySet):
     Calculates total order amount
     """
 
-    def total_amount(self):
-        return self.annotate(
+    def total_amount(self, exclude_delivered: bool = True):
+        queryset = self
+        if exclude_delivered:
+            queryset = queryset.exclude(status=OrderStatus.DELIVERED.name)
+        return queryset.annotate(
             total_amount=Sum(
                 F("ordered_items__quantity") * F("ordered_items__product_price"),
                 output_field=models.FloatField(),
@@ -124,9 +140,10 @@ class Order(models.Model):
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     phone_number = PhoneNumberField(verbose_name="Номер телефона")
     delivery_address = models.TextField(verbose_name="Адрес доставки")
+    status = models.CharField(choices=OrderStatus.to_list(), max_length=11, verbose_name='Статус заказа', default="SUBMITTED")
 
     def __str__(self):
-        return f"Заказ на {len(self.ordered_items.all())} позиций от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address}"
+        return f"[{OrderStatus[self.status].value}] Заказ на {len(self.ordered_items.all())} позиций от {self.first_name} {self.last_name} ({self.phone_number}), {self.delivery_address}"
 
     class Meta:
         verbose_name = "Заказ"

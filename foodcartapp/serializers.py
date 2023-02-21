@@ -2,7 +2,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.transaction import atomic
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
-from foodcartapp.models import OrderedItem, Order, Product
+from foodcartapp.models import OrderedItem, Order, Product, OrderStatus
 
 
 class OrderedItemSerializer(serializers.ModelSerializer):
@@ -28,6 +28,7 @@ class OrderSerializer(serializers.ModelSerializer):
     address = serializers.CharField(source="delivery_address", required=True)
 
     total_amount = serializers.FloatField(read_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Order
@@ -39,8 +40,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "address",
             "id",
             "total_amount",
+            "status"
         )
-        read_only_fields = ("id", "total_amount", *fields)
+        read_only_fields = ("id", "total_amount", 'status')
 
     @atomic
     def create(self, validated_data):
@@ -50,3 +52,6 @@ class OrderSerializer(serializers.ModelSerializer):
             OrderedItem.objects.create(**entity, order=order)
             raise Exception()
         return order
+
+    def get_status(self, instance: Order) -> str:
+        return OrderStatus[instance.status].value
